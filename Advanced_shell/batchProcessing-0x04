@@ -1,15 +1,13 @@
 #!/bin/bash
 
-# Create the output directory if it doesn't exist
+# Create output directory
 mkdir -p pokemon_data
-
-# Clear error log
 : > pokemon_data/errors.log
 
 # List of Pokémon
 pokemons=(bulbasaur ivysaur venusaur charmander charmeleon)
 
-# Function to fetch data
+# Function to fetch Pokémon
 fetch_pokemon() {
   local name="$1"
   echo "Fetching data for $name..."
@@ -21,15 +19,22 @@ fetch_pokemon() {
   fi
 }
 
-# Export function for subshell use (if needed by parallel or xargs)
-export -f fetch_pokemon
-
-# Fetch each Pokémon in background
+# Start jobs in background and store PIDs
+declare -A pids
 for name in "${pokemons[@]}"; do
   fetch_pokemon "$name" &
+  pids[$name]=$!
 done
 
-# Wait for all background jobs to finish
-wait
+# Simulate killing one process (for demo; optional)
+# You can replace "venusaur" with any name you'd like to terminate
+kill "${pids[venusaur]}" 2>/dev/null && echo "🛑 Killed fetch job for venusaur"
 
-echo "✅ All fetch operations completed."
+# Wait for remaining background jobs
+for name in "${!pids[@]}"; do
+  if [ "$name" != "venusaur" ]; then
+    wait "${pids[$name]}"
+  fi
+done
+
+echo "✅ Parallel fetching completed."
