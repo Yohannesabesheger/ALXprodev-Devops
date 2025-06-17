@@ -1,10 +1,14 @@
 #!/bin/bash
 
-# Read JSON and extract values
+# Extract data using jq
 name=$(jq -r '.name' data.json | sed 's/.*/\u&/')
 type=$(jq -r '.types[0].type.name' data.json | sed 's/.*/\u&/')
-weight=$(jq -r '.weight' data.json | awk '{printf "%.0f", $1 / 10}')
-height=$(jq -r '.height' data.json | awk '{printf "%.1f", $1 / 10}')
+weight=$(jq -r '.weight' data.json)
+height=$(jq -r '.height' data.json)
 
-# Output formatted string
-echo "$name is of type $type, weighs ${weight}kg, and is ${height}m tall."
+# Convert units
+formatted_weight=$(echo "$weight" | awk '{printf "%.0f", $1 / 10}')
+formatted_height=$(echo "$height" | awk '{printf "%.1f", $1 / 10}')
+
+# Output exactly as required
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
